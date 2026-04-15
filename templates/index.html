@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+{% block title %}VisionLab — Visão Computacional{% endblock %}
+
+{% block content %}
+<style>
+  .hero {
+    min-height: calc(100vh - 64px);
+    display: grid;
+    grid-template-rows: auto 1fr;
+  }
+
+  .hero-top {
+    padding: 80px 60px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-top::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle at 50% 50%, rgba(176,96,255,0.12) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .hero-top::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 200px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle at 50% 50%, rgba(0,229,255,0.07) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .hero-eyebrow {
+    display: flex; align-items: center; gap: 12px;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+
+  .hero-eyebrow::before {
+    content: '';
+    display: block;
+    width: 32px; height: 1px;
+    background: var(--accent);
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(3.5rem, 8vw, 7rem);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    margin-bottom: 32px;
+  }
+
+  h1 .line2 {
+    -webkit-text-stroke: 1px rgba(255,255,255,0.3);
+    color: transparent;
+  }
+
+  h1 .line3 { color: var(--accent); }
+
+  .hero-desc {
+    max-width: 440px;
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 40px;
+  }
+
+  .hero-cta {
+    display: flex; gap: 12px; flex-wrap: wrap;
+    margin-bottom: 60px;
+  }
+
+  .module-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border-top: 1px solid var(--border);
+  }
+
+  .module-card {
+    background: var(--bg);
+    padding: 40px;
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    color: var(--text);
+    transition: background 0.2s;
+  }
+
+  .module-card:hover {
+    background: var(--surface);
+  }
+
+  .module-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    transform: scaleX(0);
+    transition: transform 0.3s;
+    transform-origin: left;
+  }
+
+  .module-card.c1::before { background: var(--accent); }
+  .module-card.c2::before { background: var(--accent2); }
+  .module-card.c3::before { background: var(--accent3); }
+
+  .module-card:hover::before { transform: scaleX(1); }
+
+  .module-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 24px;
+    font-size: 1.3rem;
+  }
+
+  .c1 .module-icon { background: rgba(255,60,110,0.12); }
+  .c2 .module-icon { background: rgba(0,229,255,0.1); }
+  .c3 .module-icon { background: rgba(176,96,255,0.1); }
+
+  .module-num {
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .module-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
+  }
+
+  .module-desc {
+    font-size: 0.72rem;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 24px;
+  }
+
+  .module-tags {
+    display: flex; gap: 6px; flex-wrap: wrap;
+  }
+
+  .tag {
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    padding: 4px 10px;
+    border-radius: 100px;
+    text-transform: uppercase;
+  }
+
+  .tag-accent { background: rgba(255,60,110,0.1); color: var(--accent); }
+  .tag-cyan { background: rgba(0,229,255,0.1); color: var(--accent2); }
+  .tag-purple { background: rgba(176,96,255,0.1); color: var(--accent3); }
+  .tag-muted { background: rgba(255,255,255,0.05); color: var(--muted); }
+
+  .module-arrow {
+    position: absolute;
+    bottom: 32px; right: 32px;
+    opacity: 0;
+    transform: translate(-4px, 4px);
+    transition: all 0.2s;
+    color: var(--muted);
+  }
+
+  .module-card:hover .module-arrow {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+</style>
+
+<div class="hero">
+  <div class="hero-top">
+    <div class="hero-eyebrow">Processamento digital de imagens</div>
+    <h1>
+      <div class="line1">VISÃO</div>
+      <div class="line2">COMPU</div>
+      <div class="line3">TACIONAL</div>
+    </h1>
+    <p class="hero-desc">
+      Plataforma interativa para explorar filtros, morfologia,
+      rastreamento de objetos e análise em tempo real com OpenCV.
+    </p>
+    <div class="hero-cta">
+      <a href="/camera" class="btn btn-primary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M6.3 6.3A8 8 0 1 0 17.7 17.7"/></svg>
+        Abrir câmera
+      </a>
+      <a href="/image" class="btn btn-secondary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="m9 12 2 2 4-4"/></svg>
+        Processar imagem
+      </a>
+    </div>
+  </div>
+
+  <div class="module-grid">
+    <a href="/camera" class="module-card c1">
+      <div class="module-icon">📷</div>
+      <div class="module-num">01 / 03</div>
+      <div class="module-name">Câmera<br>Interativa</div>
+      <p class="module-desc">Aplique filtros e efeitos morfológicos em tempo real diretamente da webcam.</p>
+      <div class="module-tags">
+        <span class="tag tag-accent">real-time</span>
+        <span class="tag tag-muted">webcam</span>
+        <span class="tag tag-muted">filtros</span>
+      </div>
+      <svg class="module-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+
+    <a href="/image" class="module-card c2">
+      <div class="module-icon">🖼</div>
+      <div class="module-num">02 / 03</div>
+      <div class="module-name">Processamento<br>de Imagem</div>
+      <p class="module-desc">Carregue uma imagem e aplique transformações, visualize bit planes e exporte resultados.</p>
+      <div class="module-tags">
+        <span class="tag tag-cyan">bit-planes</span>
+        <span class="tag tag-muted">otsu</span>
+        <span class="tag tag-muted">morfologia</span>
+      </div>
+      <svg class="module-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+
+    <a href="/tracking" class="module-card c3">
+      <div class="module-icon">🎯</div>
+      <div class="module-num">03 / 03</div>
+      <div class="module-name">Rastreamento<br>de Objeto</div>
+      <p class="module-desc">Selecione um ROI em vídeo e acompanhe o objeto com recuperação automática por template matching.</p>
+      <div class="module-tags">
+        <span class="tag tag-purple">KCF tracker</span>
+        <span class="tag tag-muted">template match</span>
+      </div>
+      <svg class="module-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+</div>
+{% endblock %}

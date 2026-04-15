@@ -1,0 +1,414 @@
+{% extends "base.html" %}
+{% block title %}VisionLab — Rastreamento{% endblock %}
+
+{% block content %}
+<style>
+  .page-hero { padding: 40px 40px 32px; }
+
+  .track-layout {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 1px;
+    background: var(--border);
+  }
+
+  .track-main {
+    background: var(--bg);
+    padding: 32px;
+  }
+
+  .track-side {
+    background: var(--bg);
+    padding: 28px 24px;
+    display: flex; flex-direction: column; gap: 20px;
+  }
+
+  .video-wrap {
+    position: relative;
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  #trackFeed {
+    width: 100%; display: block;
+  }
+
+  #roiCanvas {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    cursor: crosshair;
+  }
+
+  .video-placeholder {
+    min-height: 360px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 12px;
+    color: var(--muted); font-size: 0.72rem;
+  }
+
+  .upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.7rem;
+    color: var(--muted);
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .upload-zone:hover {
+    border-color: var(--accent3);
+    color: var(--accent3);
+    background: rgba(176,96,255,0.04);
+  }
+
+  #vidFileInput { display: none; }
+
+  .panel-title {
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sep { height: 1px; background: var(--border); }
+
+  .info-block {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 0.65rem;
+    line-height: 1.8;
+    color: var(--muted);
+  }
+
+  .info-block strong { color: var(--text); }
+
+  .step-list {
+    display: flex; flex-direction: column; gap: 8px;
+  }
+
+  .step {
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 0.65rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .step-num {
+    min-width: 20px; height: 20px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.55rem;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+
+  .step.done .step-num {
+    background: rgba(0,229,176,0.15);
+    border-color: var(--success);
+    color: var(--success);
+  }
+
+  .status-bar {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px;
+    background: var(--surface2);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    font-size: 0.65rem;
+  }
+
+  .status-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--muted);
+    flex-shrink: 0;
+  }
+
+  .status-dot.live { background: var(--success); animation: pulse 1s infinite; }
+  .status-dot.warn { background: var(--warn); animation: pulse 1s infinite; }
+
+  #roiHint {
+    position: absolute;
+    top: 12px; left: 12px;
+    background: rgba(5,5,8,0.8);
+    border: 1px solid var(--accent3);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 0.62rem;
+    color: var(--accent3);
+    letter-spacing: 0.08em;
+    display: none;
+  }
+</style>
+
+<div class="page-hero">
+  <div class="page-tag">módulo 03</div>
+  <h2 style="font-family:'Syne',sans-serif;font-size:2.5rem;font-weight:800;letter-spacing:-0.02em">Rastreamento de Objeto</h2>
+  <p class="page-sub">Carregue um vídeo, selecione a região de interesse e acompanhe o objeto com recuperação automática.</p>
+</div>
+
+<div class="track-layout">
+  <div class="track-main">
+    <div class="panel-title">preview do vídeo</div>
+
+    <div class="video-wrap" id="videoWrap">
+      <div class="video-placeholder" id="vidPlaceholder">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"><rect x="2" y="2" width="20" height="20" rx="2"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+        <span>nenhum vídeo carregado</span>
+        <span style="font-size:0.6rem;color:#333">carregue um vídeo para começar</span>
+      </div>
+      <img id="trackFeed" src="" alt="" style="display:none"/>
+      <canvas id="roiCanvas" style="display:none"></canvas>
+      <div id="roiHint">Arraste para selecionar o objeto</div>
+    </div>
+
+    <div class="action-row">
+      <button class="btn btn-secondary" id="selectRoiBtn" onclick="startROI()" disabled>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" stroke-dasharray="4 2"/></svg>
+        Selecionar ROI
+      </button>
+      <button class="btn btn-ghost btn-sm" onclick="resetTracking()">reset</button>
+
+      <div class="status-bar" style="margin-left:auto">
+        <div class="status-dot" id="statusDot"></div>
+        <span id="statusLabel">aguardando vídeo</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="track-side">
+    <div>
+      <div class="panel-title">carregar vídeo</div>
+      <div class="upload-zone" onclick="document.getElementById('vidFileInput').click()" id="vidDropZone">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="2"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+        <span id="vidDropLabel">Clique para selecionar vídeo</span>
+        <span style="font-size:0.6rem">MP4, AVI, MOV, MKV</span>
+      </div>
+      <input type="file" id="vidFileInput" accept="video/*" onchange="uploadVideo(event)">
+    </div>
+
+    <div class="sep"></div>
+
+    <div>
+      <div class="panel-title">instruções</div>
+      <div class="step-list" id="stepList">
+        <div class="step" id="step1">
+          <div class="step-num">1</div>
+          <span>Carregue um arquivo de vídeo acima</span>
+        </div>
+        <div class="step" id="step2">
+          <div class="step-num">2</div>
+          <span>Clique em <strong style="color:var(--text)">Selecionar ROI</strong> para habilitar o modo de seleção</span>
+        </div>
+        <div class="step" id="step3">
+          <div class="step-num">3</div>
+          <span>Arraste sobre o vídeo para definir o objeto a rastrear</span>
+        </div>
+        <div class="step" id="step4">
+          <div class="step-num">4</div>
+          <span>O tracker KCF vai acompanhar o objeto com recuperação automática</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <div class="info-block">
+      <strong>Algoritmo:</strong> KCF Tracker<br>
+      <strong>Fallback:</strong> Template Matching (threshold 0.7)<br>
+      <strong>Suporte:</strong> OpenCV legacy + cv2
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  let videoUploaded = false;
+  let roiMode = false;
+  let drawing = false;
+  let startX, startY, currentX, currentY;
+  let streamActive = false;
+
+  const canvas = document.getElementById('roiCanvas');
+  const ctx = canvas.getContext('2d');
+
+  function setStatus(text, state='') {
+    const dot = document.getElementById('statusDot');
+    dot.className = 'status-dot ' + state;
+    document.getElementById('statusLabel').textContent = text;
+  }
+
+  function markStep(n) {
+    document.getElementById('step'+n).classList.add('done');
+    document.querySelector('#step'+n+' .step-num').textContent = '✓';
+  }
+
+  async function uploadVideo(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    document.getElementById('vidDropLabel').textContent = file.name;
+    setStatus('enviando vídeo...', 'warn');
+
+    const fd = new FormData();
+    fd.append('file', file);
+
+    try {
+      const res = await fetch('/api/tracking/upload', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (data.status === 'uploaded') {
+        videoUploaded = true;
+        document.getElementById('selectRoiBtn').disabled = false;
+        startStream();
+        markStep(1);
+        setStatus('vídeo carregado', '');
+        toast('Vídeo carregado!', 'success');
+      }
+    } catch(e) {
+      toast('Erro ao enviar vídeo', 'warn');
+      setStatus('erro', '');
+    }
+  }
+
+  function startStream() {
+    const feed = document.getElementById('trackFeed');
+    feed.src = '/api/tracking/stream?' + Date.now();
+    feed.style.display = 'block';
+    document.getElementById('vidPlaceholder').style.display = 'none';
+
+    // Sync canvas size to image
+    feed.onload = () => {
+      canvas.width = feed.offsetWidth;
+      canvas.height = feed.offsetHeight;
+    };
+    streamActive = true;
+  }
+
+  function startROI() {
+    if (!videoUploaded) return;
+    roiMode = true;
+    canvas.style.display = 'block';
+    document.getElementById('roiHint').style.display = 'block';
+    markStep(2);
+    setStatus('selecione o objeto', 'warn');
+    toast('Arraste sobre o vídeo para selecionar o objeto', 'success');
+  }
+
+  // ROI drawing
+  canvas.addEventListener('mousedown', e => {
+    if (!roiMode) return;
+    drawing = true;
+    const rect = canvas.getBoundingClientRect();
+    startX = e.clientX - rect.left;
+    startY = e.clientY - rect.top;
+  });
+
+  canvas.addEventListener('mousemove', e => {
+    if (!drawing) return;
+    const rect = canvas.getBoundingClientRect();
+    currentX = e.clientX - rect.left;
+    currentY = e.clientY - rect.top;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = 'rgba(176,96,255,0.9)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 3]);
+    ctx.strokeRect(startX, startY, currentX - startX, currentY - startY);
+    ctx.fillStyle = 'rgba(176,96,255,0.08)';
+    ctx.fillRect(startX, startY, currentX - startX, currentY - startY);
+  });
+
+  canvas.addEventListener('mouseup', async e => {
+    if (!drawing) return;
+    drawing = false;
+
+    const rect = canvas.getBoundingClientRect();
+    const x = Math.min(startX, currentX) / rect.width;
+    const y = Math.min(startY, currentY) / rect.height;
+    const w = Math.abs(currentX - startX) / rect.width;
+    const h = Math.abs(currentY - startY) / rect.height;
+
+    if (w < 0.02 || h < 0.02) {
+      toast('Seleção muito pequena, tente novamente', 'warn');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/tracking/select_roi', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ x, y, w, h })
+      });
+      const data = await res.json();
+      if (data.status === 'roi_set') {
+        roiMode = false;
+        canvas.style.display = 'none';
+        document.getElementById('roiHint').style.display = 'none';
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        markStep(3);
+        markStep(4);
+        setStatus('rastreando objeto', 'live');
+        toast('Rastreamento iniciado!', 'success');
+      }
+    } catch(e) {
+      toast('Erro ao definir ROI', 'warn');
+    }
+  });
+
+  // Touch support
+  canvas.addEventListener('touchstart', e => {
+    e.preventDefault();
+    const t = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    drawing = true; roiMode = true;
+    startX = t.clientX - rect.left;
+    startY = t.clientY - rect.top;
+  });
+
+  canvas.addEventListener('touchmove', e => {
+    e.preventDefault();
+    if (!drawing) return;
+    const t = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    currentX = t.clientX - rect.left;
+    currentY = t.clientY - rect.top;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = 'rgba(176,96,255,0.9)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 3]);
+    ctx.strokeRect(startX, startY, currentX - startX, currentY - startY);
+  });
+
+  canvas.addEventListener('touchend', e => {
+    canvas.dispatchEvent(new MouseEvent('mouseup', {}));
+  });
+
+  async function resetTracking() {
+    await fetch('/api/tracking/reset', { method: 'POST' });
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('done'));
+    document.querySelectorAll('.step .step-num').forEach((n, i) => n.textContent = i+1);
+    roiMode = false;
+    drawing = false;
+    canvas.style.display = 'none';
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    setStatus('aguardando seleção', '');
+    toast('Rastreamento resetado');
+  }
+</script>
+{% endblock %}

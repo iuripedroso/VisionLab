@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+{% block title %}VisionLab — Câmera{% endblock %}
+
+{% block content %}
+<style>
+  .page-hero { padding: 40px 40px 32px; }
+
+  .content-grid {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 1px;
+    background: var(--border);
+  }
+
+  .main-panel { padding: 32px; background: var(--bg); }
+  .side-panel {
+    padding: 28px 24px;
+    background: var(--bg);
+    display: flex; flex-direction: column; gap: 24px;
+  }
+
+  .video-wrap {
+    position: relative;
+    background: var(--surface);
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+
+  .video-wrap img { width: 100%; display: block; }
+
+  .video-overlay-bar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 12px 16px;
+    background: linear-gradient(transparent, rgba(5,5,8,0.9));
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .section-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+    font-weight: 500;
+  }
+
+  .effect-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .effect-btn {
+    padding: 10px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+    display: flex; flex-direction: column; gap: 2px;
+  }
+
+  .effect-btn .e-name { font-weight: 500; color: var(--text); font-size: 0.65rem; }
+  .effect-btn .e-type { color: var(--muted); }
+
+  .effect-btn:hover {
+    border-color: rgba(255,255,255,0.18);
+    background: var(--surface);
+  }
+
+  .effect-btn.active {
+    border-color: var(--accent);
+    background: rgba(255,60,110,0.08);
+  }
+
+  .effect-btn.active .e-name { color: var(--accent); }
+
+  .controls-row {
+    display: flex; gap: 8px;
+  }
+
+  .indicator {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.65rem;
+    color: var(--muted);
+  }
+
+  .indicator .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--muted);
+  }
+
+  .indicator.live .dot {
+    background: var(--success);
+    animation: pulse 1s infinite;
+  }
+
+  .effect-name-display {
+    font-size: 0.65rem;
+    color: var(--accent2);
+    letter-spacing: 0.08em;
+  }
+
+  .sep { height: 1px; background: var(--border); }
+</style>
+
+<div class="page-hero">
+  <div class="page-tag">módulo 01</div>
+  <h2 style="font-family:'Syne',sans-serif;font-size:2.5rem;font-weight:800;letter-spacing:-0.02em">Câmera Interativa</h2>
+  <p class="page-sub">Visualize e aplique efeitos de processamento de imagem em tempo real diretamente da webcam.</p>
+</div>
+
+<div class="content-grid">
+  <div class="main-panel">
+    <div class="panel-title">feed ao vivo</div>
+
+    <div class="video-wrap" id="videoWrap">
+      <div class="video-placeholder" id="placeholder">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="2" y="7" width="20" height="14" rx="2"/>
+          <path d="M16 3 8 3M12 3v4"/>
+        </svg>
+        <span>câmera inativa</span>
+        <span style="font-size:0.6rem;color:#333">pressione INICIAR para ativar</span>
+      </div>
+      <img id="videoFeed" src="" alt="feed" style="display:none"/>
+      <div class="video-overlay-bar">
+        <div class="indicator" id="statusIndicator">
+          <div class="dot"></div>
+          <span id="statusText">offline</span>
+        </div>
+        <div class="effect-name-display" id="effectDisplay">sem efeito</div>
+      </div>
+    </div>
+
+    <div class="controls-row">
+      <button class="btn btn-primary" id="startBtn" onclick="startCamera()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Iniciar
+      </button>
+      <button class="btn btn-secondary" id="stopBtn" onclick="stopCamera()" disabled>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+        Parar
+      </button>
+      <button class="btn btn-ghost btn-sm" onclick="resetEffect()">reset efeito</button>
+    </div>
+  </div>
+
+  <div class="side-panel">
+    <div>
+      <div class="section-label">Filtros de cor</div>
+      <div class="effect-grid">
+        <button class="effect-btn" data-effect="gray" onclick="setEffect(this)">
+          <span class="e-name">Cinza</span>
+          <span class="e-type">grayscale</span>
+        </button>
+        <button class="effect-btn" data-effect="negative" onclick="setEffect(this)">
+          <span class="e-name">Negativo</span>
+          <span class="e-type">bitwise_not</span>
+        </button>
+        <button class="effect-btn" data-effect="binary" onclick="setEffect(this)">
+          <span class="e-name">Binário</span>
+          <span class="e-type">otsu</span>
+        </button>
+        <button class="effect-btn" data-effect="canny" onclick="setEffect(this)">
+          <span class="e-name">Canny</span>
+          <span class="e-type">bordas</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <div>
+      <div class="section-label">Suavização</div>
+      <div class="effect-grid">
+        <button class="effect-btn" data-effect="blur_mean" onclick="setEffect(this)">
+          <span class="e-name">Média</span>
+          <span class="e-type">blur 5×5</span>
+        </button>
+        <button class="effect-btn" data-effect="blur_median" onclick="setEffect(this)">
+          <span class="e-name">Mediana</span>
+          <span class="e-type">median 5</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <div>
+      <div class="section-label">Morfologia</div>
+      <div class="effect-grid">
+        <button class="effect-btn" data-effect="erode" onclick="setEffect(this)">
+          <span class="e-name">Erosão</span>
+          <span class="e-type">erode</span>
+        </button>
+        <button class="effect-btn" data-effect="dilate" onclick="setEffect(this)">
+          <span class="e-name">Dilatação</span>
+          <span class="e-type">dilate</span>
+        </button>
+        <button class="effect-btn" data-effect="open" onclick="setEffect(this)">
+          <span class="e-name">Abertura</span>
+          <span class="e-type">morph_open</span>
+        </button>
+        <button class="effect-btn" data-effect="close" onclick="setEffect(this)">
+          <span class="e-name">Fechamento</span>
+          <span class="e-type">morph_close</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  let cameraActive = false;
+
+  const effectLabels = {
+    gray: 'CINZA', negative: 'NEGATIVO', binary: 'BINÁRIO OTSU',
+    blur_mean: 'BLUR MÉDIO', blur_median: 'BLUR MEDIANA', canny: 'CANNY',
+    erode: 'EROSÃO', dilate: 'DILATAÇÃO', open: 'ABERTURA', close: 'FECHAMENTO'
+  };
+
+  function startCamera() {
+    document.getElementById('videoFeed').src = '/api/camera/stream';
+    document.getElementById('videoFeed').style.display = 'block';
+    document.getElementById('placeholder').style.display = 'none';
+    document.getElementById('startBtn').disabled = true;
+    document.getElementById('stopBtn').disabled = false;
+    const ind = document.getElementById('statusIndicator');
+    ind.classList.add('live');
+    document.getElementById('statusText').textContent = 'ao vivo';
+    cameraActive = true;
+    toast('Câmera iniciada', 'success');
+  }
+
+  function stopCamera() {
+    fetch('/api/camera/stop', { method: 'POST' });
+    document.getElementById('videoFeed').src = '';
+    document.getElementById('videoFeed').style.display = 'none';
+    document.getElementById('placeholder').style.display = 'flex';
+    document.getElementById('startBtn').disabled = false;
+    document.getElementById('stopBtn').disabled = true;
+    const ind = document.getElementById('statusIndicator');
+    ind.classList.remove('live');
+    document.getElementById('statusText').textContent = 'offline';
+    cameraActive = false;
+    toast('Câmera parada');
+  }
+
+  function setEffect(btn) {
+    document.querySelectorAll('.effect-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const effect = btn.dataset.effect;
+    fetch('/api/camera/effect', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ effect })
+    });
+    document.getElementById('effectDisplay').textContent = effectLabels[effect] || effect;
+    toast(`Efeito: ${effectLabels[effect]}`, 'success');
+  }
+
+  function resetEffect() {
+    document.querySelectorAll('.effect-btn').forEach(b => b.classList.remove('active'));
+    fetch('/api/camera/effect', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ effect: null })
+    });
+    document.getElementById('effectDisplay').textContent = 'sem efeito';
+    toast('Efeito removido');
+  }
+</script>
+{% endblock %}
