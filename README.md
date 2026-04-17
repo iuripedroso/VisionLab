@@ -5,8 +5,7 @@
 </p>
 
 <p align="center">
-  <!-- Substitua o link abaixo pela URL da sua screenshot ou caminho local -->
-  <img src="docs/preview.png" width="700"/>
+  <img src="https://github.com/iuripedroso/VisionLab/blob/main/assets/tela%20principal.PNG?raw=true" width="700"/>
 </p>
 
 <p align="center">
