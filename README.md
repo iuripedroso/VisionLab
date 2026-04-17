@@ -99,9 +99,3 @@ python app.py
 - A câmera usa o índice `0` por padrão (webcam principal)
 - Vídeos enviados são salvos temporariamente em `uploads/` e sobrescritos a cada upload
 - Para produção, substitua `debug=True` por um servidor WSGI como **Gunicorn**
-
----
-
-## ⌘ Licença
-
-MIT — fique à vontade para usar, modificar e distribuir.
