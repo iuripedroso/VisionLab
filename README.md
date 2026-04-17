@@ -25,9 +25,9 @@ Este projeto é uma plataforma web interativa para **Processamento Digital de Im
 
 ## ⌘ Funcionalidades
 
-- 📷 Câmera interativa com efeitos em tempo real via streaming MJPEG
-- 🖼 Processamento de imagens com visualização dos 8 bit planes
-- 🎯 Rastreamento de objetos em vídeo com KCF Tracker + recuperação automática por template matching
+-  Câmera interativa com efeitos em tempo real via streaming MJPEG
+-  Processamento de imagens com visualização dos 8 bit planes
+-  Rastreamento de objetos em vídeo com KCF Tracker + recuperação automática por template matching
 
 ---
 
