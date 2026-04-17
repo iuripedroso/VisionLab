@@ -31,23 +31,6 @@ Este projeto é uma plataforma web interativa para **Processamento Digital de Im
 
 ---
 
-## ⌘ Estrutura do Projeto
-
-```
-vision_app/
-├── app.py                  # Backend Flask (rotas, streaming, processamento)
-├── requirements.txt
-├── templates/
-│   ├── base.html           # Layout base com nav e sistema de toasts
-│   ├── index.html          # Página inicial
-│   ├── camera.html         # Módulo câmera interativa
-│   ├── image.html          # Módulo processamento de imagem
-│   └── tracking.html       # Módulo rastreamento de objeto
-└── uploads/                # Vídeos enviados (gerado automaticamente)
-```
-
----
-
 ## ⌘ Como Rodar
 
 ```bash
