@@ -1,27 +1,38 @@
-# VisionLab 🎯
+<h1 align="center">VisionLab — Visão Computacional</h1>
 
-> Plataforma web interativa para Processamento Digital de Imagens com OpenCV e Flask.
+<p align="center">
+  Processamento digital de imagens em tempo real com OpenCV e Flask
+</p>
 
----
+<p align="center">
+  <!-- Substitua o link abaixo pela URL da sua screenshot ou caminho local -->
+  <img src="docs/preview.png" width="700"/>
+</p>
 
-## 📸 Preview
-
-<!-- Substitua o caminho abaixo pela sua screenshot -->
-![VisionLab Preview](docs/preview.png)
-
-> _Adicione uma screenshot do app aqui. Basta colocar a imagem na pasta `docs/` com o nome `preview.png`, ou ajuste o caminho acima._
-
----
-
-## ✨ Funcionalidades
-
-- **Câmera Interativa** — aplique filtros em tempo real diretamente da webcam via streaming MJPEG
-- **Processamento de Imagem** — carregue imagens, aplique transformações e visualize os 8 bit planes
-- **Rastreamento de Objeto** — selecione um ROI em vídeo e acompanhe com KCF Tracker + recuperação por template matching
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.10-blue?style=for-the-badge&logo=python">
+  <img src="https://img.shields.io/badge/OpenCV-4.8-5C3EE8?style=for-the-badge&logo=opencv">
+  <img src="https://img.shields.io/badge/Flask-2.3-000000?style=for-the-badge&logo=flask">
+  <img src="https://img.shields.io/badge/Visão-Computacional-ff3c6e?style=for-the-badge">
+</p>
 
 ---
 
-## 🗂 Estrutura do projeto
+## ⌘ Sobre o Projeto
+
+Este projeto é uma plataforma web interativa para **Processamento Digital de Imagens**, desenvolvida com Flask e OpenCV. Permite aplicar filtros, transformações morfológicas e rastreamento de objetos diretamente no navegador — sem instalar nada além do Python.
+
+---
+
+## ⌘ Funcionalidades
+
+- 📷 Câmera interativa com efeitos em tempo real via streaming MJPEG
+- 🖼 Processamento de imagens com visualização dos 8 bit planes
+- 🎯 Rastreamento de objetos em vídeo com KCF Tracker + recuperação automática por template matching
+
+---
+
+## ⌘ Estrutura do Projeto
 
 ```
 vision_app/
@@ -33,102 +44,64 @@ vision_app/
 │   ├── camera.html         # Módulo câmera interativa
 │   ├── image.html          # Módulo processamento de imagem
 │   └── tracking.html       # Módulo rastreamento de objeto
-├── uploads/                # Vídeos enviados pelo usuário (gerado automaticamente)
-└── docs/
-    └── preview.png         # ← coloque sua screenshot aqui
+└── uploads/                # Vídeos enviados (gerado automaticamente)
 ```
 
 ---
 
-## 🚀 Como rodar
-
-### 1. Clone o repositório
+## ⌘ Como Rodar
 
 ```bash
+# 1. Clone o repositório
 git clone https://github.com/seu-usuario/visionlab.git
 cd visionlab/vision_app
-```
 
-### 2. Instale as dependências
-
-```bash
+# 2. Instale as dependências
 pip install -r requirements.txt
-```
 
-> **Dependências:** `flask`, `opencv-python`, `numpy`
-
-### 3. Inicie o servidor
-
-```bash
+# 3. Inicie o servidor
 python app.py
-```
 
-### 4. Acesse no navegador
-
-```
-http://localhost:5000
+# 4. Acesse no navegador
+# http://localhost:5000
 ```
 
 ---
 
-## 🎨 Módulos
+## ⌘ Efeitos Disponíveis
 
-### 📷 Câmera Interativa (`/camera`)
-
-Abre o feed da webcam com streaming em tempo real. Efeitos disponíveis:
-
-| Efeito | Descrição |
-|--------|-----------|
-| Cinza | Conversão para escala de cinza |
-| Negativo | Inversão de cores (`bitwise_not`) |
-| Binário | Limiarização automática (Otsu) |
-| Blur Média | Suavização por média 5×5 |
-| Blur Mediana | Suavização por mediana 5 |
-| Canny | Detecção de bordas |
-| Erosão | Operação morfológica de erosão |
-| Dilatação | Operação morfológica de dilatação |
-| Abertura | Morfologia: erosão + dilatação |
-| Fechamento | Morfologia: dilatação + erosão |
+| Efeito | Tipo | Descrição |
+|--------|------|-----------|
+| Cinza | Cor | Conversão para escala de cinza |
+| Negativo | Cor | Inversão de cores `bitwise_not` |
+| Binário | Cor | Limiarização automática Otsu |
+| Canny | Cor | Detecção de bordas |
+| Blur Média | Suavização | Média 5×5 |
+| Blur Mediana | Suavização | Mediana 5 |
+| Erosão | Morfologia | Reduz regiões claras |
+| Dilatação | Morfologia | Expande regiões claras |
+| Abertura | Morfologia | Erosão + Dilatação |
+| Fechamento | Morfologia | Dilatação + Erosão |
 
 ---
 
-### 🖼 Processamento de Imagem (`/image`)
+## ⌘ Tecnologias Utilizadas
 
-Faça upload de uma imagem (JPG, PNG, BMP, TIFF) e:
-- Aplique qualquer um dos 10 efeitos listados acima
-- Visualize os **8 bit planes** individualmente (clique para usar como resultado)
-- Baixe o resultado processado como PNG
-
----
-
-### 🎯 Rastreamento de Objeto (`/tracking`)
-
-1. Faça upload de um vídeo (MP4, AVI, MOV, MKV)
-2. Clique em **Selecionar ROI** e arraste sobre o vídeo para marcar o objeto
-3. O tracker KCF acompanha o objeto automaticamente
-4. Em caso de perda, o sistema tenta recuperar via **template matching** (threshold 0.7)
+- Python
+- Flask
+- OpenCV
+- NumPy
 
 ---
 
-## 🛠 Tecnologias
+## ⌘ Observações
 
-- **Backend:** Python 3, Flask
-- **Visão Computacional:** OpenCV (`cv2`), NumPy
-- **Frontend:** HTML5, CSS3 (vanilla), JavaScript
-- **Streaming:** MJPEG via `multipart/x-mixed-replace`
-- **Tracker:** KCF (via `cv2.legacy.TrackerKCF_create` ou `cv2.TrackerKCF_create`)
+- A câmera usa o índice `0` por padrão (webcam principal)
+- Vídeos enviados são salvos temporariamente em `uploads/` e sobrescritos a cada upload
+- Para produção, substitua `debug=True` por um servidor WSGI como **Gunicorn**
 
 ---
 
-## ⚠️ Observações
-
-- A câmera usa o índice `0` por padrão (webcam principal). Para trocar, altere `cv2.VideoCapture(0)` em `app.py`.
-- Vídeos enviados são salvos temporariamente em `uploads/track_video.mp4` e sobrescritos a cada novo upload.
-- O servidor deve ser executado em uma máquina com câmera conectada para o módulo de câmera funcionar.
-- Para produção, substitua `app.run(debug=True)` por um servidor WSGI como **Gunicorn**.
-
----
-
-## 📄 Licença
+## ⌘ Licença
 
 MIT — fique à vontade para usar, modificar e distribuir.
